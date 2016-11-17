@@ -6,43 +6,82 @@
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
     <script type="application/javascript">
         angular.module('priceMonitor', [])
-                .controller('priceMonitorController', function ($http) {
-                    var priceMonitor = this;
-                    priceMonitor.login = function(){
+                .controller('LoginController', function ($http, productService) {
+                    var loginMonitor = this;
+                    loginMonitor.login = function () {
                         $http({
                             method: 'GET',
-                            url: 'http://127.0.0.1:3050/users/'+priceMonitor.user.name,
-                            data: priceMonitor.user
+                            url: 'http://127.0.0.1:3050/users/' + loginMonitor.user.name,
+                            data: loginMonitor.user
                         }).then(function successCallback(response) {
                             console.log('Response : ' + JSON.stringify(response.data));
+                            productService.setProducts(response.data);
                         }, function errorCallback(response) {
 
                         });
+                    };
+                })
+                .controller('productController', function (productService) {
+                    var productMonitor = this;
+                    productMonitor.products = {};
+                    productMonitor.timedEvent = function () {
+                        productMonitor.products = productService.getProducts();
+                        setTimeout(productMonitor.timedEvent, 3000);
+                    }
+                    productMonitor.timedEvent();
+                })
+                .service('productService', function () {
+                    var productList = {};
+                    var setProducts = function (newObj) {
+                        productList = newObj;
+                    };
+                    var getProducts = function () {
+                        return productList;
+                    };
+                    return {
+                        setProducts: setProducts,
+                        getProducts: getProducts
                     };
                 });
     </script>
 </head>
 <body>
-<div ng-controller="priceMonitorController as priceMonitor">
-    <form ng-submit="priceMonitor.login()">
+<div ng-controller="LoginController as loginMonitor">
+    <form ng-submit="loginMonitor.login()">
         <div>
             <div>
                 <label>
                     Username
                 </label>
-                <input type="text" ng-model="priceMonitor.user.name">
+                <input type="text" ng-model="loginMonitor.user.name">
             </div>
             <div>
                 <label>
                     Password
                 </label>
-                <input type="password" ng-model="priceMonitor.user.password">
+                <input type="password" ng-model="loginMonitor.user.password">
             </div>
             <div>
                 <input type="submit" value="Login">
             </div>
         </div>
     </form>
+</div>
+<div ng-controller="productController as productMonitor">
+    <table>
+        <tr>
+            <th>
+                Name
+            </th>
+            <th>
+                Price
+            </th>
+        </tr>
+        <tr ng-repeat="product in productMonitor.products">
+            <td>{{ product.name }}</td>
+            <td>{{ product.price }}</td>
+        </tr>
+    </table>
 </div>
 </body>
 </html>
