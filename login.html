@@ -24,6 +24,10 @@
                             //console.log('Error: ' + response.error);
                         });
                     };
+                    priceController.subscribe = function(){
+                        console.log('Subcribe : '+JSON.stringify(priceController.subscribeData));
+                        //console.log('Subcribe : '+ priceController.subscribeData);
+                    };
                 });
     </script>
 </head>
@@ -65,10 +69,16 @@
                 </th>
             </tr>
             <tr ng-repeat="product in priceController.products">
-                <td>{{ product.name }}</td>
-                <td>{{ product.price }}</td>
                 <td>
-                    <select name="subcription" ng-model="priceController.subcribe.when">
+                    <!-- <input type="text" ng-value="product.id" ng-bind="priceController.subscribeData.subscribe[$index].productId" disabled> -->
+                    {{ product.name }}
+                </td>
+                <td>
+                    <!-- <input type="text" ng-value="product.price" ng-bind="priceController.subscribeData.subscribe[$index].productPrice" disabled> -->
+                    {{ product.price }}
+                </td>
+                <td>
+                    <select name="subcription" ng-model="priceController.subscribeData.subscribe[$index].when">
                     <option value="" checked> ---Please Select---<br>
                     <option value="always"> ALWAYS<br>
                     <option value="alltimelow"> ALL_TIME_LOW<br>
@@ -85,6 +95,9 @@
     </div>
     <div>
         {{ priceController.subscribeData }}
+    </div>
+    <div>
+        {{priceController.subscribe}}
     </div>
 </div>
 </body>

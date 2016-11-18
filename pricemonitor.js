@@ -2,11 +2,13 @@ console.log('Price Monitor Server');
 
 var express = require('express');
 var http = require('http');
+var bodyParser = require('body-parser');
 var app = express();
 var app_users = [{"userid" : "root"}];
+app.use(bodyParser.json());
 app.get('/', function(req, res) {
     //app_users = [{"userid" : "root"}];
-    res.sendFile(__dirname + '/login.html');
+    //res.sendFile(__dirname + '/login.html');
 });
 
 app.get('/users/:userId', function(req, res){
@@ -30,6 +32,11 @@ app.get('/users/:userId', function(req, res){
         });
     });
     console.log(user_response);
+});
+
+app.post('/subscribe', function(req, res){
+    console.log(req.body);
+    res.json(req.body);
 });
 
 app.listen(3050);
