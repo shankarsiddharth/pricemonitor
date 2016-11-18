@@ -39,5 +39,15 @@ app.post('/subscribe', function(req, res){
     res.json(req.body);
 });
 
+app.post('/unsubscribe', function(req, res){
+    console.log(req.body);
+    res.json(req.body);
+});
+
+app.post('/priceDataPoint', function(req, res){
+    console.log(req.body);
+    res.json(req.body);
+});
+
 app.listen(3050);
 console.log('Application running on http://127.0.0.1:3050/');
