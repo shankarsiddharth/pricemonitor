@@ -2,7 +2,7 @@ console.log('Price Monitor Server');
 
 var express = require('express');
 var http = require('http');
-var bodyParser = require('body-parser');
+//var bodyParser = require('body-parser');
 var app = express();
 var app_users = [{"userid" : "root"}];
 var productPrice = [];
@@ -23,7 +23,7 @@ var subscription = [{
         }
     ]
 }];
-app.use(bodyParser.json());
+/*app.use(bodyParser.json());
 app.get('/', function(req, res) {
     //app_users = [{"userid" : "root"}];
     //res.sendFile(__dirname + '/login.html');
@@ -66,16 +66,44 @@ app.post('/priceDataPoint', function(req, res){
     console.log(req.body);
     res.json(req.body);
 });
-
-app.listen(3050);
-console.log('Application running on http://127.0.0.1:3050/');
+*/
+app.listen(4050);
+console.log('Application running on http://127.0.0.1:4050/');
 
 var processChanges = function(productPrice){
 
 };
 var addSubscription = function(newSubscription){
-    for( var index in subscription){
-
+    //user_id & subscribe array
+    //if user id is present,
+        //check for the subscribe array
+        //if an item is present update
+        //else, add
+    //else add the subscription
+    var isUserIdPresent = false;
+    for( var userIndex in subscription){
+        if(newSubscription.user_id == subscription[userIndex].user_id){
+            isUserIdPresent = true;
+            console.log('Type of new subscription: ' + JSON.stringify(newSubscription.subscribe[0].product_id));
+            for(var newProductSubscriptionIndex in newSubscription.subscribe){
+                var isProductPresent = false;
+                for(var productSubscriptionIndex in subscription[userIndex].subscribe){
+                    if(newSubscription.subscribe[newProductSubscriptionIndex].product_id == subscription[userIndex].subscribe[productSubscriptionIndex].product_id){
+                        isProductPresent = true;
+                        subscription[userIndex].subscribe[productSubscriptionIndex].when = newSubscription.subscribe[newProductSubscriptionIndex].when;
+                        console.log('Product Subscription Changed.');
+                    }
+                }
+                if(!isProductPresent){
+                    subscription[userIndex].subscribe.push(newSubscription.subscribe[newProductSubscriptionIndex]);
+                    console.log('New Product added');
+                }
+            }
+        }
+    }
+    if(!isUserIdPresent){
+        subscription.push(newSubscription);
+        console.log('User added');
     }
     subscription.forEach(function(item) {
 
@@ -95,7 +123,21 @@ var pollProductList = function(){
             productPrice = parsed.products;
         });
     });
-    processChanges(productPrice);
+    //processChanges(productPrice);
+    var news = {
+        "user_id": "142942",
+        "subscribe": [
+            {
+                "product_id": "12341",
+                "when": "ALWAYS"
+            },
+            {
+                "product_id": "4324",
+                "when": "ALL_TIME_LOW"
+            }
+            ]
+    };
+    addSubscription(news);
     setTimeout(pollProductList, 150000);
 };
 pollProductList();
