@@ -26,8 +26,6 @@ app.get('/users/:userId', function(req, res){
         response.on('end', function() {
             // Data reception is done, do whatever with it!
             var parsed = JSON.parse(products);
-           // console.log('Parsed : '+parsed);
-            //console.log('Products : '+products);
             res.json(parsed);
         });
     });

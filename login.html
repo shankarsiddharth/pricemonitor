@@ -9,7 +9,10 @@
                 .controller('PriceController', function ($http, $scope, $rootScope) {
                     var priceController = this;
                     priceController.products = [];
+                    priceController.subscribeData = {userId: '', subscribe: []};
                     priceController.login = function () {
+                        priceController.subscribeData.userId = priceController.user.name;
+                        console.log('UserId : ' +  priceController.subscribeData.userId);
                         $http({
                             method: 'GET',
                             url: 'http://127.0.0.1:3050/users/' + priceController.user.name,
@@ -48,6 +51,7 @@
     </form>
     </div>
     <div>
+        <form ng-submit="priceController.subscribe()">
         <table>
             <tr>
                 <th>
@@ -56,12 +60,31 @@
                 <th>
                     Price
                 </th>
+                <th>
+                    Subcription
+                </th>
             </tr>
             <tr ng-repeat="product in priceController.products">
                 <td>{{ product.name }}</td>
                 <td>{{ product.price }}</td>
+                <td>
+                    <select name="subcription" ng-model="priceController.subcribe.when">
+                    <option value="" checked> ---Please Select---<br>
+                    <option value="always"> ALWAYS<br>
+                    <option value="alltimelow"> ALL_TIME_LOW<br>
+                    <option value="morethanten"> MORE_THAN_10<br>
+                    </select>
+                </td>
+                <td>
+                  <!--  <input type="submit" value="Subscribe"> -->
+                </td>
             </tr>
         </table>
+            <input type="submit" value="Subscribe">
+        </form>
+    </div>
+    <div>
+        {{ priceController.subscribeData }}
     </div>
 </div>
 </body>
