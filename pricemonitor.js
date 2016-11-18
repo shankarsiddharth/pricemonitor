@@ -3,9 +3,9 @@ console.log('Price Monitor Server');
 var express = require('express');
 var http = require('http');
 var app = express();
-var app_users;
+var app_users = [{"userid" : "root"}];
 app.get('/', function(req, res) {
-    app_users = [{"userid" : "root"}];
+    //app_users = [{"userid" : "root"}];
     res.sendFile(__dirname + '/login.html');
 });
 
@@ -26,7 +26,9 @@ app.get('/users/:userId', function(req, res){
         response.on('end', function() {
             // Data reception is done, do whatever with it!
             var parsed = JSON.parse(products);
-            res.json(products);
+           // console.log('Parsed : '+parsed);
+            //console.log('Products : '+products);
+            res.json(parsed);
         });
     });
     console.log(user_response);

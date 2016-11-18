@@ -35,6 +35,6 @@ var randomPriceGenerator = function(){
         productArray.push({id: product_id[index], name: product_name[index], price: current_price[index]});
     }
     console.log(productArray);
-    setTimeout(randomPriceGenerator, 300000);
+    setTimeout(randomPriceGenerator, 1000);
 };
 randomPriceGenerator();
