@@ -84,7 +84,8 @@ var addSubscription = function(newSubscription){
 var pollProductList = function(){
     http.get({
         hostname: '127.0.0.1',
-        port: 3333
+        port: 3333,
+        path: '/priceDataPoint'
     }, function(response) {
         var products = '';
         response.on('data', function(d) {

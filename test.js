@@ -23,50 +23,7 @@ var subscription = [{
         }
     ]
 }];
-/*app.use(bodyParser.json());
-app.get('/', function(req, res) {
-    //app_users = [{"userid" : "root"}];
-    //res.sendFile(__dirname + '/login.html');
-});
-
-app.get('/users/:userId', function(req, res){
-    console.log(req.params);
-    app_users.push({"userid": req.params.userId});
-    user_response = {'users' : app_users};
-    user_response.new_user = req.params.userId;
-    http.get({
-        hostname: '127.0.0.1',
-        port: 3333
-    }, function(response) {
-        // Continuously update stream with data
-        var products = '';
-        response.on('data', function(d) {
-            products += d;
-        });
-        response.on('end', function() {
-            // Data reception is done, do whatever with it!
-            var parsed = JSON.parse(products);
-            res.json(parsed);
-        });
-    });
-    console.log(user_response);
-});
-
-app.post('/subscribe', function(req, res){
-    console.log(req.body);
-    res.json(req.body);
-});
-
-app.post('/unsubscribe', function(req, res){
-    console.log(req.body);
-    res.json(req.body);
-});
-
-app.post('/priceDataPoint', function(req, res){
-    console.log(req.body);
-    res.json(req.body);
-});
-*/
+var subscriptionWithPrice = [];
 app.listen(4050);
 console.log('Application running on http://127.0.0.1:4050/');
 
@@ -78,13 +35,13 @@ var addSubscription = function(newSubscription){
     //if user id is present,
         //check for the subscribe array
         //if an item is present update
-        //else, add
+        //else, add the product item
     //else add the subscription
     var isUserIdPresent = false;
     for( var userIndex in subscription){
         if(newSubscription.user_id == subscription[userIndex].user_id){
             isUserIdPresent = true;
-            console.log('Type of new subscription: ' + JSON.stringify(newSubscription.subscribe[0].product_id));
+            //console.log('Type of new subscription: ' + JSON.stringify(newSubscription.subscribe[0].product_id));
             for(var newProductSubscriptionIndex in newSubscription.subscribe){
                 var isProductPresent = false;
                 for(var productSubscriptionIndex in subscription[userIndex].subscribe){
@@ -105,15 +62,34 @@ var addSubscription = function(newSubscription){
         subscription.push(newSubscription);
         console.log('User added');
     }
-    subscription.forEach(function(item) {
-
-    });
+    console.log('Subscribe : '+JSON.stringify(subscription));
 };
+
+var removeSubscription = function(newUnSubscription){
+    //if user id is present
+        //check for the subcribe array
+        //if the product is present, delete
+    var isUserIdPresent = false;
+    for(var userIndex in subscription){
+        if(newUnSubscription.user_id == subscription[userIndex].user_id){
+            isUserIdPresent = true;
+            for(var unsubscribeProductIndex in newUnSubscription.unsubscribe){
+                var isProductPresent = false;
+                for(var productUnSubscriptionIndex in subscription[userIndex].subscribe){
+                    if(newUnSubscription.unsubscribe[unsubscribeProductIndex].product_id == subscription[userIndex].subscribe[productUnSubscriptionIndex].product_id){
+                        isProductPresent = true;
+                        subscription[userIndex].subscribe.splice(productUnSubscriptionIndex, 1);
+                        console.log('Product Subcription Deleted');
+                    }
+                }
+            }
+        }
+    }
+    console.log('Subscribe : '+JSON.stringify(subscription));
+}
+
 var pollProductList = function(){
-    http.get({
-        hostname: '127.0.0.1',
-        port: 3333
-    }, function(response) {
+    http.get('http://127.0.0.1:3333/priceDataPoint', function(response) {
         var products = '';
         response.on('data', function(d) {
             products += d;
@@ -121,23 +97,33 @@ var pollProductList = function(){
         response.on('end', function() {
             var parsed = JSON.parse(products);
             productPrice = parsed.products;
+            console.log(productPrice);
         });
     });
     //processChanges(productPrice);
     var news = {
-        "user_id": "142942",
+        "user_id": "1429421",
         "subscribe": [
             {
-                "product_id": "12341",
+                "product_id": "123411",
                 "when": "ALWAYS"
             },
             {
-                "product_id": "4324",
-                "when": "ALL_TIME_LOW"
+                "product_id": "1234111",
+                "when": "ALWAYS"
             }
             ]
     };
+    var rems = {
+        "user_id": "1429421",
+        "unsubscribe": [
+            {
+                "product_id": "123411"
+            }
+        ]
+    };
     addSubscription(news);
+    removeSubscription(rems);
     setTimeout(pollProductList, 150000);
 };
 pollProductList();
