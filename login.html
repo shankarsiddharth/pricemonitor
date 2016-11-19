@@ -15,7 +15,7 @@
                         console.log('UserId : ' +  priceController.subscribeData.userId);
                         $http({
                             method: 'GET',
-                            url: 'http://127.0.0.1:3050/users/' + priceController.user.name,
+                            url: 'http://127.0.0.1:3333/users/' + priceController.user.name,
                             data: priceController.user
                         }).then(function successCallback(response) {
                             console.log('Response : ' + JSON.stringify(response.data));
