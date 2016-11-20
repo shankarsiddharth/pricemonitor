@@ -23,9 +23,11 @@ var all_time_low_product_price = [];
 var userSockets = new Map();
 
 app.use(bodyParser.json());
+app.use(express.static(__dirname + '/angularjs'));
+app.use(express.static(__dirname + '/socket.io'));
 
 app.get('/', function(req, res) {
-    res.sendFile(__dirname + '/login.html');
+    res.sendFile(__dirname + '/index.html');
 });
 
 app.get('/users/:userId', function(req, res){
@@ -175,7 +177,6 @@ var startProductStream = function(){
         productArray.push({id: product_id[index], name: product_name[index], price: current_price[index], url: current_url[index], all_time_low_price: all_time_low_product_price[index]});
     }
     console.log("Product Stream Server Started");
-    //console.log(productArray);
 };
 
 startProductStream();

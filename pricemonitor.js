@@ -26,7 +26,7 @@ var subscription = [{
 app.use(bodyParser.json());
 app.get('/', function(req, res) {
     //app_users = [{"userid" : "root"}];
-    //res.sendFile(__dirname + '/login.html');
+    //res.sendFile(__dirname + '/index.html');
 });
 
 app.get('/users/:userId', function(req, res){

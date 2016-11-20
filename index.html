@@ -3,11 +3,12 @@
     <title>
         Login Page
     </title>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
+    <script src="/angularjs/angular.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script type="application/javascript">
         angular.module('priceMonitor', [])
                 .controller('PriceController', function ($http, $scope, $rootScope) {
+                    $rootScope.notificationMessage = '';
                     var priceController = this;
                     priceController.socket = io('http://127.0.0.1:3333');
                     priceController.products = [];
@@ -20,6 +21,7 @@
                         console.log('Disconnected from server!');
                     });
                     priceController.socket.on('message', function (data) {
+                        $rootScope.notificationMessage = JSON.stringify(data.message);
                         console.log('PriceMonitor : ' + JSON.stringify(data.message));
                         var options = {
                             body: JSON.stringify(data.message)
@@ -156,6 +158,12 @@
     <pre>
         <h3> Message from Server</h3>
         {{priceController.messageFromServer}}
+    </pre>
+</div>
+<div>
+    <pre>
+        <h3> Notification Message</h3>
+        {{$rootScope.notificationMessage}}
     </pre>
 </div>
 </body>
