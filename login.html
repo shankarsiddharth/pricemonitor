@@ -12,11 +12,19 @@
                     priceController.socket = io('http://127.0.0.1:3333');
                     priceController.products = [];
                     priceController.subscribeData = {userId: '', subscribe: []};
-                    priceController.socket.on("connect", function () {
-                        console.log("Connected to server!");
+                    priceController.messageFromServer = '';
+                    priceController.socket.on('connect', function () {
+                        console.log('Connected to server!');
                     });
-                    priceController.socket.on("disconnect", function () {
-                        console.log("Disconnected from server!");
+                    priceController.socket.on('disconnect', function () {
+                        console.log('Disconnected from server!');
+                    });
+                    priceController.socket.on('message', function (data) {
+                        console.log('PriceMonitor : ' + JSON.stringify(data.message));
+                        var options = {
+                            body: JSON.stringify(data.message)
+                        };
+                        new Notification('PriceMonitor', options);
                     });
                     priceController.login = function () {
                         priceController.subscribeData.userId = priceController.user.name;
@@ -33,10 +41,61 @@
                             //console.log('Error: ' + response.error);
                         });
                     };
-                    priceController.subscribe = function(){
-                        console.log('Subcribe : '+JSON.stringify(priceController.subscribeData));
-                        //console.log('Subcribe : '+ priceController.subscribeData);
+                    priceController.subscribe = function(product, when){
+                        console.log('Subcribe : '+JSON.stringify(product)+' '+when);
+                        var subscribe = [];
+                        subscribe.push({product_id: product.id.toString(), when: when.toString()})
+                        $http({
+                            method: 'POST',
+                            url: 'http://127.0.0.1:3333/subscribe',
+                            data: {user_id: priceController.user.name, subscribe: subscribe}
+                        }).then(function successCallback(response) {
+                            console.log('Response : ' + JSON.stringify(response.data));
+                            priceController.messageFromServer = response.data.message;
+                        }, function errorCallback(response) {
+                            //console.log('Error: ' + response.error);
+                        });
                     };
+                    priceController.unsubscribe = function(product){
+                        console.log('Subcribe : '+JSON.stringify(product));
+                        var unsubscribe = [];
+                        unsubscribe.push({product_id: product.id.toString()});
+                        $http({
+                            method: 'POST',
+                            url: 'http://127.0.0.1:3333/unsubscribe',
+                            data: {user_id: priceController.user.name, unsubscribe: unsubscribe}
+                        }).then(function successCallback(response) {
+                            console.log('Response : ' + JSON.stringify(response.data));
+                            priceController.messageFromServer = response.data.message;
+                        }, function errorCallback(response) {
+                        });
+                    };
+                    priceController.askNotificationPermission = function(){
+                        if (!("Notification" in window)) {
+                            alert("This browser does not support desktop notification");
+                        }
+                        else if (Notification.permission === "granted") {
+                            var options = {
+                                body: "Notification will be shown here"
+                            };
+                            var notification = new Notification("PriceMonitor",options);
+                        }
+                        else if (Notification.permission !== 'denied') {
+                            Notification.requestPermission(function (permission) {
+                                if (!('permission' in Notification)) {
+                                    Notification.permission = permission;
+                                }
+
+                                if (permission === "granted") {
+                                    var options = {
+                                        body: "Notification will be shown here"
+                                    };
+                                    var notification = new Notification("PriceMonitor",options);
+                                }
+                            });
+                        }
+                    };
+                    priceController.askNotificationPermission();
                 });
     </script>
 </head>
@@ -47,24 +106,16 @@
         <div>
             <div>
                 <label>
-                    Username
+                    UserID
                 </label>
                 <input type="text" ng-model="priceController.user.name">
-            </div>
-            <div>
-                <label>
-                    Password
-                </label>
-                <input type="password" ng-model="priceController.user.password">
-            </div>
-            <div>
-                <input type="submit" value="Login">
+                <input type="submit" value="Connect to Server">
             </div>
         </div>
     </form>
     </div>
     <div>
-        <form ng-submit="priceController.subscribe()">
+        <form>
         <table>
             <tr>
                 <th>
@@ -79,35 +130,33 @@
             </tr>
             <tr ng-repeat="product in priceController.products">
                 <td>
-                    <!-- <input type="text" ng-value="product.id" ng-bind="priceController.subscribeData.subscribe[$index].productId" disabled> -->
                     {{ product.name }}
                 </td>
                 <td>
-                    <!-- <input type="text" ng-value="product.price" ng-bind="priceController.subscribeData.subscribe[$index].productPrice" disabled> -->
                     {{ product.price }}
                 </td>
                 <td>
                     <select name="subcription" ng-model="priceController.subscribeData.subscribe[$index].when">
                     <option value="" checked> ---Please Select---<br>
-                    <option value="always"> ALWAYS<br>
-                    <option value="alltimelow"> ALL_TIME_LOW<br>
-                    <option value="morethanten"> MORE_THAN_10<br>
+                    <option value="ALWAYS"> ALWAYS<br>
+                    <option value="ALL_TIME_LOW"> ALL_TIME_LOW<br>
+                    <option value="MORE_THAN_10"> MORE_THAN_10<br>
                     </select>
                 </td>
                 <td>
-                  <!--  <input type="submit" value="Subscribe"> -->
+                    <input type="button" ng-click="priceController.subscribe(product, priceController.subscribeData.subscribe[$index].when)" value="Subscribe">
+                </td>
+                <td>
+                    <input type="button" ng-click="priceController.unsubscribe(product)" value="UnSubscribe">
                 </td>
             </tr>
         </table>
-            <input type="submit" value="Subscribe">
         </form>
     </div>
-    <div>
-        {{ priceController.subscribeData }}
-    </div>
-    <div>
-        {{priceController.subscribe}}
-    </div>
+    <pre>
+        <h3> Message from Server</h3>
+        {{priceController.messageFromServer}}
+    </pre>
 </div>
 </body>
 </html>

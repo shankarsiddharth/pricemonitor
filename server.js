@@ -155,6 +155,7 @@ var processSubscription = function (updatedProduct, reason) {
             if(updatedProduct.id == subscription[subscriptionIndex].subscribe[productIndex].product_id){
                 if(reason == subscription[subscriptionIndex].subscribe[productIndex].when){
                     var notificationPayload = {productId: updatedProduct.id, url: updatedProduct.url, price: updatedProduct.price, reason: reason};
+                    userSockets.get(subscription[subscriptionIndex].user_id).emit('message', {message: notificationPayload});
                     console.log('UserId : ' + subscription[subscriptionIndex].user_id);
                     console.log('PayLoad : ' + JSON.stringify(notificationPayload));
                 }
@@ -188,7 +189,7 @@ io.on('connection', function (socket) {
         userSockets.forEach(function (value, key){
             if(value == socket){
                 userSockets.delete(key);
-                console.log('User with ID:' + key + ' Disconnected');
+                console.log('User with ID: ' + key + ' Disconnected');
             }
         });
     });
