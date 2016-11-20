@@ -22,7 +22,7 @@ app.get('/', function(req, res) {
 });
 
 app.get('/users/:userId', function(req, res){
-    console.log(req.params);
+    //console.log(req.params);
     app_users.push({"userid": req.params.userId});
     res.json({products: productArray});
 });
@@ -167,7 +167,7 @@ var startProductStream = function(){
         productArray.push({id: product_id[index], name: product_name[index], price: current_price[index], url: current_url[index], all_time_low_price: all_time_low_product_price[index]});
     }
     console.log("Product Stream Server Started");
-    console.log(productArray);
+    //console.log(productArray);
 };
 
 startProductStream();
