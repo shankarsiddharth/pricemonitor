@@ -52,13 +52,15 @@ app.post('/priceDataPoint', function(req, res){
             if(newProduct.price < productArray[index].all_time_low_price){
                 productArray[index].all_time_low_price = newProduct.price;
                 processSubscription(productArray[index], 'ALL_TIME_LOW');
-            }else if(newProduct.price < oldPrice){
+            }
+            if(newProduct.price < oldPrice){
                 var minimumPercentageChange = 10.0;
                 var actualChange = ((oldPrice - newProduct.price) / 100.0 ) * 100.0;
                 if(actualChange > minimumPercentageChange){
                     processSubscription(productArray[index], 'MORE_THAN_10');
                 }
-            }else{
+            }
+            if(newProduct.price != oldPrice){
                 processSubscription(productArray[index], 'ALWAYS');
             }
         }
@@ -126,18 +128,97 @@ var removeSubscription = function(newUnSubscription){
     console.log('Subscribe : '+JSON.stringify(subscription));
 };
 
-var processSubscription = function () {
+var processSubscription = function (updatedProduct, reason) {
+    for(var subscriptionIndex in subscription){
+        for(var productIndex in subscription[subscriptionIndex].subscribe){
+            if(updatedProduct.id == subscription[subscriptionIndex].subscribe[productIndex].product_id){
+                if(reason == subscription[subscriptionIndex].subscribe[productIndex].when){
+                    var notificationPayload = {productId: updatedProduct.id, url: updatedProduct.url, price: updatedProduct.price, reason: reason};
+                    console.log('UserId : ' + subscription[subscriptionIndex].user_id);
+                    console.log('PayLoad : ' + JSON.stringify(notificationPayload));
+                }
+            }
+        }
+    }
+};
 
+var getSubscriptionUserIds = function (currentSubscription) {
+    var userIds = [];
+    for(var userIndex in currentSubscription){
+        userIds.push(currentSubscription[userIndex].user_id);
+    }
+    if(userIds == []){
+        return null;
+    }else{
+        var result = [];
+        userIds.forEach(function(id) {
+            if(result.indexOf(id) < 0) {
+                result.push(id);
+            }
+        });
+        if(result == []){
+            return null;
+        }else{
+            return result;
+        }
+    }
+};
+
+var getSubscriptionByUserId = function(userID, currentSubscription){
+    var result = [];
+    for(var userIndex in currentSubscription){
+        if(currentSubscription[userIndex].user_id == userID){
+            result.push(currentSubscription[userIndex].subscribe);
+        }
+    }
+    if(result == [] ){
+        return null;
+    }else{
+        return result;
+    }
+};
+
+var getSubscriptionProductsByUserId = function (currentSubscription) {
+    var userIds = getSubscriptionUserIds(currentSubscription);
+    if(userIds != null) {
+        for(var userIndex in userIds){
+            var subscriptions = getSubscriptionByUserId(userIds[userIndex], currentSubscription);
+            if(subscriptions != null){
+                var subscriptionMap = new Map();
+                for(var subscriptionIndex in subscriptions){
+
+                }
+            }
+        }
+    }
+};
+
+var getUniqueSubscriptions = function(currentSubscription){
+    var subscribe = currentSubscription.subscribe;
+    var subscribeMap = new Map();
+    for(var subscriptionIndex in subscribe){
+        subscribeMap.set(subscribe[subscriptionIndex].product_id, subscribe[subscriptionIndex].when);
+    }
+    subscribe = [];
+    subscribeMap.forEach(function (value, key) {
+        subscribe.push({product_id : key, when: value});
+    });
+    if(subscribe == []){
+        return null;
+    }else{
+        return subscribe;
+    }
 };
 
 var startProductStream = function(){
     for(index = 0; index <  product_size; index++){
-        product_id[index] = index+1;
+        product_id[index] = (index+1).toString();
         product_name[index] = "product"+product_id[index];
         current_price[index] = 0;
         current_url[index] = 'http://www.amazon.com/product/'+(product_id[index]).toString();
         current_price[index] = Math.floor((Math.random() * 1000) + 1);
-        productArray.push({id: product_id[index], name: product_name[index], price: current_price[index], url: current_url[index], all_time_low_price: current_price[index]});
+        all_time_low_product_price[index] = current_price[index];
+        productArray.push({id: product_id[index], name: product_name[index], price: current_price[index], url: current_url[index], all_time_low_price: all_time_low_product_price[index]});
     }
     console.log("Product Stream Server Started");
     console.log(productArray);
