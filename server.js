@@ -1,8 +1,13 @@
 var util = require('util');
 var http = require('http');
+
 var express = require('express');
 var bodyParser = require('body-parser');
+var socketio = require('socket.io')
+
 var app = express();
+var server = http.Server(app);
+var io = socketio(server);
 
 var index = 0;
 var product_size = 10;
@@ -14,6 +19,8 @@ var productArray = [];
 var app_users = [{"userid" : "root"}];
 var subscription = [];
 var all_time_low_product_price = [];
+
+var userSockets = new Map();
 
 app.use(bodyParser.json());
 
@@ -172,5 +179,20 @@ var startProductStream = function(){
 
 startProductStream();
 
-app.listen(3333);
+io.on('connection', function (socket) {
+    socket.on('addUser', function(data){
+        userSockets.set(data.userId, socket);
+        console.log('User with ID: '+ data.userId +' Connected');
+    });
+    socket.on("disconnect", function () {
+        userSockets.forEach(function (value, key){
+            if(value == socket){
+                userSockets.delete(key);
+                console.log('User with ID:' + key + ' Disconnected');
+            }
+        });
+    });
+});
+
+server.listen(3333);
 console.log('Server running on http://127.0.0.1:3333/');

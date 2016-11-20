@@ -4,14 +4,23 @@
         Login Page
     </title>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
     <script type="application/javascript">
         angular.module('priceMonitor', [])
                 .controller('PriceController', function ($http, $scope, $rootScope) {
                     var priceController = this;
+                    priceController.socket = io('http://127.0.0.1:3333');
                     priceController.products = [];
                     priceController.subscribeData = {userId: '', subscribe: []};
+                    priceController.socket.on("connect", function () {
+                        console.log("Connected to server!");
+                    });
+                    priceController.socket.on("disconnect", function () {
+                        console.log("Disconnected from server!");
+                    });
                     priceController.login = function () {
                         priceController.subscribeData.userId = priceController.user.name;
+                        priceController.socket.emit('addUser', {userId: priceController.user.name});
                         console.log('UserId : ' +  priceController.subscribeData.userId);
                         $http({
                             method: 'GET',
