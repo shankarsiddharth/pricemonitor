@@ -80,7 +80,16 @@ app.get('/subscription', function(req, res){
     res.json({subscription : subscription});
 });
 
-var addSubscription = function(newSubscription){
+var addSubscription = function(currentSubscription){
+    var newSubscription = {user_id: currentSubscription.user_id, subscribe: []};
+    var subscribe = currentSubscription.subscribe;
+    var subscribeMap = new Map();
+    for(var subscriptionIndex in subscribe){
+        subscribeMap.set(subscribe[subscriptionIndex].product_id, subscribe[subscriptionIndex].when);
+    }
+    subscribeMap.forEach(function (value, key) {
+        newSubscription.subscribe.push({product_id : key, when: value});
+    });
     var isUserIdPresent = false;
     for( var userIndex in subscription){
         if(newSubscription.user_id == subscription[userIndex].user_id){
@@ -125,6 +134,11 @@ var removeSubscription = function(newUnSubscription){
             }
         }
     }
+    for(var sIndex in subscription){
+        if(subscription[sIndex].subscribe.length <= 0){
+            subscription.splice(sIndex, 1);
+        }
+    }
     console.log('Subscribe : '+JSON.stringify(subscription));
 };
 
@@ -139,74 +153,6 @@ var processSubscription = function (updatedProduct, reason) {
                 }
             }
         }
-    }
-};
-
-var getSubscriptionUserIds = function (currentSubscription) {
-    var userIds = [];
-    for(var userIndex in currentSubscription){
-        userIds.push(currentSubscription[userIndex].user_id);
-    }
-    if(userIds == []){
-        return null;
-    }else{
-        var result = [];
-        userIds.forEach(function(id) {
-            if(result.indexOf(id) < 0) {
-                result.push(id);
-            }
-        });
-        if(result == []){
-            return null;
-        }else{
-            return result;
-        }
-    }
-};
-
-var getSubscriptionByUserId = function(userID, currentSubscription){
-    var result = [];
-    for(var userIndex in currentSubscription){
-        if(currentSubscription[userIndex].user_id == userID){
-            result.push(currentSubscription[userIndex].subscribe);
-        }
-    }
-    if(result == [] ){
-        return null;
-    }else{
-        return result;
-    }
-};
-
-var getSubscriptionProductsByUserId = function (currentSubscription) {
-    var userIds = getSubscriptionUserIds(currentSubscription);
-    if(userIds != null) {
-        for(var userIndex in userIds){
-            var subscriptions = getSubscriptionByUserId(userIds[userIndex], currentSubscription);
-            if(subscriptions != null){
-                var subscriptionMap = new Map();
-                for(var subscriptionIndex in subscriptions){
-
-                }
-            }
-        }
-    }
-};
-
-var getUniqueSubscriptions = function(currentSubscription){
-    var subscribe = currentSubscription.subscribe;
-    var subscribeMap = new Map();
-    for(var subscriptionIndex in subscribe){
-        subscribeMap.set(subscribe[subscriptionIndex].product_id, subscribe[subscriptionIndex].when);
-    }
-    subscribe = [];
-    subscribeMap.forEach(function (value, key) {
-        subscribe.push({product_id : key, when: value});
-    });
-    if(subscribe == []){
-        return null;
-    }else{
-        return subscribe;
     }
 };
 
